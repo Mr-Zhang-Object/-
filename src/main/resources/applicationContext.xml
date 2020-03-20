@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		                         http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+		                         http://www.springframework.org/schema/context
+		                         http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd">
+
+    <!--引入连接数据库文件-->
+    <context:property-placeholder location="classpath:db.properties"/>
+
+    <!--扫描包-->
+    <context:component-scan base-package="com.lening"/>
+
+    <!--配置数据源-->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource">
+        <!--配置数据库驱动-->
+        <property name="driverClassName" value="${jdbc.driver}"/>
+        <!--配置url-->
+        <property name="url" value="${jdbc.url}"/>
+        <!--用户名-->
+        <property name="username" value="${jdbc.username}"/>
+        <!--密码-->
+        <property name="password" value="${jdbc.password}"/>
+
+        <!--连接池的最大链接数-->
+        <property name="maxActive" value="10"/>
+        <!--最大空闲数-->
+        <property name="maxIdle" value="5"/>
+    </bean>
+
+    <!--把JPA交给spring管理-->
+    <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <!--引入数据源-->
+        <property name="dataSource" ref="dataSource"/>
+
+        <!--指定JPA扫描实体类所在的包-->
+        <property name="packagesToScan" value="com.lening.pojo"/>
+        <!--指定持久层提供者为hibernate-->
+        <property name="persistenceProvider">
+            <bean class="org.hibernate.ejb.HibernatePersistence"></bean>
+        </property>
+        <!--配置JPA对数据库的操作-->
+        <property name="jpaVendorAdapter">
+            <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+                <!--展示sql-->
+                <property name="showSql" value="true"/>
+                <!--配置数据库类型-->
+                <property name="database" value="MYSQL"/>
+                <!--数据库对应的方言-->
+                <property name="databasePlatform" value="org.hibernate.dialect.MySQL5Dialect"/>
+                <!--自动建表-->
+                <property name="generateDdl" value="true"/>
+            </bean>
+        </property>
+
+        <!--jpa连接的数据库方言-->
+        <property name="jpaDialect">
+            <bean class="org.springframework.orm.jpa.vendor.HibernateJpaDialect"/>
+        </property>
+    </bean>
+
+    <!--把JPA接口交给spring管理-->
+    <jpa:repositories base-package="com.lening.dao" entity-manager-factory-ref="entityManagerFactory"/>
+
+    <!--配置事务管理器-->
+    <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+        <!--配置事务需要管理的区域-->
+        <property name="entityManagerFactory" ref="entityManagerFactory"/>
+    </bean>
+
+    <!--开启事务注解(在SSM中我们是在xml中配置的)-->
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+</beans>
