@@ -44,6 +44,7 @@ public class UserController {
     @ResponseBody
     public List<UserBean> queryAll(){
         System.out.println("第一次修改");
+        System.out.println("上传到github");
         List<UserBean> list = userService.queryAll();
         return list;
     }
