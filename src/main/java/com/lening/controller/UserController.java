@@ -43,6 +43,7 @@ public class UserController {
     @RequestMapping("queryAll")
     @ResponseBody
     public List<UserBean> queryAll(){
+        System.out.println("第一次修改");
         List<UserBean> list = userService.queryAll();
         return list;
     }
